@@ -1,6 +1,6 @@
 import {AgentExecutor, createOpenAIFunctionsAgent} from "langchain/agents";
 import {BaseMessagePromptTemplateLike, ChatPromptTemplate, MessagesPlaceholder} from "@langchain/core/prompts";
-import {ChatOpenAI, OpenAIEmbeddings} from "@langchain/openai";
+import {ChatOpenAI} from "@langchain/openai";
 import {BaseCallbackHandler} from "@langchain/core/callbacks/base";
 import {AIMessage, HumanMessage} from "@langchain/core/messages";
 import {DynamicStructuredTool, DynamicTool, StructuredTool} from "@langchain/core/tools";
@@ -9,7 +9,6 @@ import {LocalForageService as storage} from "./storage";
 import {Plugin} from "../interface/plugin";
 import {ChatMessage, ChatSessionConfig} from "../interface/message";
 import {MessageUtil} from "./message-util";
-import {Calculator} from "@langchain/community/tools/calculator";
 import {Role} from "../interface/role";
 import {RunnableConfig} from "@langchain/core/runnables";
 import {CallbackManagerForToolRun} from "@langchain/core/callbacks/manager";
@@ -30,33 +29,6 @@ class PluginExecutor {
   }
 
   public async execute(inputMessage: ChatMessage, historyChatList: ChatMessage[], sessionConfig: ChatSessionConfig | undefined, sessionSetting: SessionSetting, handler: BaseCallbackHandler) {
-    const promptMessages: (ChatPromptTemplate<InputValues, string> | BaseMessagePromptTemplateLike)[] = [
-      ["system", `客户端已经集成markdown、mermaid。`],
-      new MessagesPlaceholder({
-        variableName: "",
-        optional: true
-      }),
-      new MessagesPlaceholder("chat_history"),
-      new MessagesPlaceholder("chat_input"),
-      new MessagesPlaceholder("agent_scratchpad")
-    ];
-
-    let systemMessage = sessionSetting.defaultSystemMessage ?? "";
-    if (sessionConfig && sessionConfig.roleId) {
-      const roleList = await storage.getItem<Role[]>("role_list");
-      const role = roleList?.find(role => role.id === sessionConfig.roleId);
-      if (role) {
-        systemMessage = role.preset;
-      }
-    }
-    if (systemMessage.length > 0) {
-      promptMessages.unshift(["system", `${systemMessage}`]);
-    }
-
-    const prompt = ChatPromptTemplate.fromMessages(promptMessages);
-
-    // const prompt = await pull<ChatPromptTemplate>("hwchase17/openai-functions-agent");
-
     const model = new ChatOpenAI({
       temperature: getModelTemperatureByPrecision(sessionConfig?.modelPrecision ?? sessionSetting.defaultModelPrecision),
       topP: getModelTopPByPrecision(sessionConfig?.modelPrecision ?? sessionSetting.defaultModelPrecision),
@@ -68,16 +40,7 @@ class PluginExecutor {
       baseURL: this.baseURL
     });
 
-    const embeddings = new OpenAIEmbeddings({
-      modelName: this.modelName,
-      openAIApiKey: this.apikey,
-    }, {
-      baseURL: this.baseURL
-    });
-
-    const tools: StructuredTool[] = [
-      new Calculator()
-    ];
+    const tools: StructuredTool[] = [];
 
     const pluginList = await storage.getItem<Plugin[]>("plugin_list");
     if (pluginList && pluginList.length > 0) {
@@ -124,17 +87,6 @@ class PluginExecutor {
       }
     }
 
-    const agent = await createOpenAIFunctionsAgent({
-      llm: model,
-      tools: tools,
-      prompt: prompt
-    });
-
-    const agentExecutor = AgentExecutor.fromAgentAndTools({
-      agent: agent,
-      tools: tools
-    });
-
     const chatHistory = [];
     for (const chatMessage of historyChatList) {
       const messageContent = MessageUtil.covertChatContent(chatMessage);
@@ -153,12 +105,58 @@ class PluginExecutor {
       content: MessageUtil.covertChatContent(inputMessage)
     });
 
-    await agentExecutor.invoke({
-      chat_history: chatHistory,
-      chat_input: chatInput
-    }, {
-      callbacks: [handler]
-    });
+    const promptMessages: (ChatPromptTemplate<InputValues, string> | BaseMessagePromptTemplateLike)[] = [
+      ["system", `客户端已经集成markdown、mermaid。`],
+      new MessagesPlaceholder({
+        variableName: "",
+        optional: true
+      }),
+      new MessagesPlaceholder("chat_history"),
+      new MessagesPlaceholder("chat_input")
+    ];
+
+    let systemMessage = sessionSetting.defaultSystemMessage ?? "";
+    if (sessionConfig && sessionConfig.roleId) {
+      const roleList = await storage.getItem<Role[]>("role_list");
+      const role = roleList?.find(role => role.id === sessionConfig.roleId);
+      if (role) {
+        systemMessage = role.preset;
+      }
+    }
+    if (systemMessage.length > 0) {
+      promptMessages.unshift(["system", `${systemMessage}`]);
+    }
+
+    if (tools.length === 0) {
+      const prompt = ChatPromptTemplate.fromMessages(promptMessages);
+      const chain = prompt.pipe(model);
+      await chain.invoke({
+        chat_history: chatHistory,
+        chat_input: chatInput
+      }, {
+        callbacks: [handler]
+      });
+    } else {
+      promptMessages.push(new MessagesPlaceholder("agent_scratchpad"));
+      const prompt = ChatPromptTemplate.fromMessages(promptMessages);
+      const agent = await createOpenAIFunctionsAgent({
+        llm: model,
+        tools: tools,
+        prompt: prompt
+      });
+
+      const agentExecutor = AgentExecutor.fromAgentAndTools({
+        agent: agent,
+        tools: tools
+      });
+
+      await agentExecutor.invoke({
+        chat_history: chatHistory,
+        chat_input: chatInput
+      }, {
+        callbacks: [handler]
+      });
+    }
   }
 }
 
