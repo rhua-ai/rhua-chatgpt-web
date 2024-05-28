@@ -106,7 +106,6 @@ class PluginExecutor {
     });
 
     const promptMessages: (ChatPromptTemplate<InputValues, string> | BaseMessagePromptTemplateLike)[] = [
-      ["system", `客户端已经集成markdown、mermaid。`],
       new MessagesPlaceholder({
         variableName: "",
         optional: true
@@ -115,16 +114,17 @@ class PluginExecutor {
       new MessagesPlaceholder("chat_input")
     ];
 
-    let systemMessage = sessionSetting.defaultSystemMessage ?? "";
     if (sessionConfig && sessionConfig.roleId) {
       const roleList = await storage.getItem<Role[]>("role_list");
       const role = roleList?.find(role => role.id === sessionConfig.roleId);
       if (role) {
-        systemMessage = role.preset;
+        promptMessages.unshift(["system", role.preset]);
       }
     }
+
+    let systemMessage = sessionSetting.defaultSystemMessage ?? "";
     if (systemMessage.length > 0) {
-      promptMessages.unshift(["system", `${systemMessage}`]);
+      promptMessages.unshift(["system", systemMessage]);
     }
 
     if (tools.length === 0) {

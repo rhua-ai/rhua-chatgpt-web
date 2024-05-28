@@ -171,9 +171,9 @@ function NormalIndex() {
           field="defaultSystemMessage"
           label={{
             text: "默认系统消息",
-            extra: <Tooltip content="每次对话最开始的系统消息，该值会被角色预设覆盖。" children={<IconHelpCircle />} />
+            extra: <Tooltip content="每次对话固定在最前面的系统消息。" children={<IconHelpCircle />} />
           }}
-          placeholder="默认系统消息，可为空"
+          placeholder="为空则不添加系统消息"
           showClear={true}
         />
         <Form.InputNumber
