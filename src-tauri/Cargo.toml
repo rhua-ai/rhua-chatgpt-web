@@ -1,6 +1,6 @@
 [package]
 name = "rhua-chatgpt-web"
-version = "1.0.0"
+version = "1.0.1"
 description = "rhua chatgpt web"
 authors = ["xggz"]
 license = ""
