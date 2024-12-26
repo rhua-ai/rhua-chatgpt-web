@@ -9,7 +9,7 @@ import {IconMore, IconPlus, IconSearch} from "@douyinfe/semi-icons";
 import React, {createRef, useEffect, useState} from "react";
 import {Role} from "../../interface/role";
 import {LocalForageService as storage} from "../../utils/storage";
-import {nanoid} from "ai";
+import {generateId} from "ai";
 
 function RoleIndex() {
   const { Header, Content } = Layout;
@@ -70,7 +70,7 @@ function RoleIndex() {
       });
     } else {
       const newRoleForm = {...roleForm};
-      newRoleForm.id = nanoid();
+      newRoleForm.id = generateId();
       storage.pushItem<Role>("role_list", newRoleForm).then(roleList => {
         setRoleList(roleList);
         hideRoleModal();

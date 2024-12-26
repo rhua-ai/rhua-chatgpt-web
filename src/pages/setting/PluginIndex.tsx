@@ -18,7 +18,7 @@ import {
 } from "@douyinfe/semi-illustrations";
 import React, {createRef, useEffect, useState} from "react";
 import {Plugin} from "../../interface/plugin";
-import {nanoid} from "ai";
+import {generateId} from "ai";
 import {LocalForageService as storage} from "../../utils/storage";
 
 function PluginIndex() {
@@ -65,7 +65,7 @@ function PluginIndex() {
 
   const createPlugin = () => {
     const newPlugin: Plugin = {
-      id: nanoid(),
+      id: generateId(),
       name: "测试插件",
       detail: "",
       color: "var(--semi-color-primary)",

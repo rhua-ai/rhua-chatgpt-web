@@ -10,8 +10,9 @@ import {
 import {toPng} from "html-to-image";
 import {CommonUtil} from "../utils/common-util";
 import {downloadDir} from "@tauri-apps/api/path";
-import {writeBinaryFile} from "@tauri-apps/api/fs";
-import {dialog} from "@tauri-apps/api";
+import {writeFile} from "@tauri-apps/plugin-fs";
+import * as dialog from "@tauri-apps/plugin-dialog"
+import {window} from "@tauri-apps/api";
 
 interface MessageShareProps {
   show: boolean;
@@ -57,7 +58,8 @@ export const MessageShare: React.FC<MessageShareProps> = React.memo((
   const downloadMessageShareImage = () => {
     if (messageShareRef.current) {
       toPng(messageShareRef.current).then(async (image) => {
-        if (window.__TAURI__) {
+        console.log(window)
+        if (window) {
           const path = await downloadDir();
           const filePath = `${path}${chatSession?.content}.png`;
           const result = await dialog.save({
@@ -77,10 +79,7 @@ export const MessageShare: React.FC<MessageShareProps> = React.memo((
             const response = await fetch(image);
             const buffer = await response.arrayBuffer();
             const uint8Array = new Uint8Array(buffer);
-            await writeBinaryFile({
-              path: result,
-              contents: uint8Array
-            });
+            await writeFile(result, uint8Array);
             Toast.success({
               content: "下载成功",
               showClose: false,

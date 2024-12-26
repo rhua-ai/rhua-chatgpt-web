@@ -7,7 +7,7 @@ import ModelIndex from "./pages/setting/ModelIndex";
 import PluginIndex from "./pages/setting/PluginIndex";
 import NormalIndex from "./pages/setting/NormalIndex";
 import NotFound from "./pages/404";
-import {invoke} from "@tauri-apps/api/tauri";
+import {invoke} from "@tauri-apps/api/core";
 import {useEffect, useState} from "react";
 import {LocalForageService as storage} from "./utils/storage";
 

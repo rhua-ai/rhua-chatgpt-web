@@ -19,7 +19,7 @@ import {
 import React, {createRef, useCallback, useEffect, useRef, useState} from "react";
 import {LocalForageService as storage} from "../../utils/storage";
 import PluginExecutor from "../../utils/plugin-executor";
-import {nanoid} from "ai";
+import {generateId} from "ai";
 import {BaseCallbackHandler} from "@langchain/core/callbacks/base";
 import {
   IllustrationNoContent, IllustrationNoContentDark
@@ -63,7 +63,7 @@ function CommentIndex() {
   }
   const sendAdditionSubmit = () => {
     const addition: TagProps = {
-      tagKey: sendAdditionType + "_" + nanoid(),
+      tagKey: sendAdditionType + "_" + generateId(),
       children: sendAdditionContent,
       closable: true,
       color: 'light-blue',
@@ -113,7 +113,7 @@ function CommentIndex() {
       if (newSessionList == null || newSessionList.length == 0) {
         const now = new Date();
         newSessionList.push({
-          id: nanoid(),
+          id: generateId(),
           name: "Bot",
           avatar: "Bot",
           content: "新的聊天",
@@ -264,7 +264,7 @@ function CommentIndex() {
     }
 
     const inputMessage: ChatMessage = {
-      id: nanoid(),
+      id: generateId(),
       type: 'user',
       name: sessionSetting.userName,
       content: lastUserChatContent,
@@ -294,7 +294,7 @@ function CommentIndex() {
     }
 
     const botMessage: ChatMessage = {
-      id: nanoid(),
+      id: generateId(),
       type: 'bot',
       name: 'Bot',
       content: '',
@@ -505,7 +505,7 @@ function CommentIndex() {
       botName = role.label as string;
     }
     const newSession: ChatSession = {
-      id: nanoid(),
+      id: generateId(),
       name: botName,
       avatar: "",
       content: sessionContent,
