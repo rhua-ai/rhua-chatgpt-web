@@ -1,10 +1,9 @@
-import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import Index from "./Index";
 
 // 应用样式
-import "./styles.scss";
+// import "./styles.scss";
 import "./markdown.css";
 import "./markdown-dark.css";
 import "katex/dist/katex.min.css"
