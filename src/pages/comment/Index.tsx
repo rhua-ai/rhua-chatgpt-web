@@ -39,7 +39,6 @@ import {initialOpenaiAttribute, initialSessionSetting} from "../../utils/initial
 import {MessageShare} from "../../components/MessageShare";
 import {CommonUtil} from "../../utils/common-util";
 import mermaid from "mermaid";
-import {IconRating, IconSpin} from "@douyinfe/semi-icons-lab";
 
 function CommentIndex() {
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark');
@@ -914,13 +913,6 @@ function CommentIndex() {
               />
             </Form>
           </Modal>
-          <MessageShare
-            show={showMessageShare}
-            messageList={shareMessageList}
-            chatSessionLayout={sessionSetting.chatSessionLayout}
-            chatSession={currentCommentSession}
-            closeMessageShare={closeMessageShare}
-          />
         </Content>
         <Footer className="comment-send-box">
           <div className="comment-send-top">
