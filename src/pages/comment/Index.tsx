@@ -913,6 +913,13 @@ function CommentIndex() {
               />
             </Form>
           </Modal>
+          <MessageShare
+            show={showMessageShare}
+            messageList={shareMessageList}
+            chatSessionLayout={sessionSetting.chatSessionLayout}
+            chatSession={currentCommentSession}
+            closeMessageShare={closeMessageShare}
+          />
         </Content>
         <Footer className="comment-send-box">
           <div className="comment-send-top">

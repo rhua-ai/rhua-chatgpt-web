@@ -12,7 +12,6 @@ import {CommonUtil} from "../utils/common-util";
 import {downloadDir} from "@tauri-apps/api/path";
 import {writeFile} from "@tauri-apps/plugin-fs";
 import * as dialog from "@tauri-apps/plugin-dialog"
-import {window} from "@tauri-apps/api";
 
 interface MessageShareProps {
   show: boolean;
@@ -58,8 +57,7 @@ export const MessageShare: React.FC<MessageShareProps> = React.memo((
   const downloadMessageShareImage = () => {
     if (messageShareRef.current) {
       toPng(messageShareRef.current).then(async (image) => {
-        console.log(window)
-        if (window) {
+        if (window.__TAURI_OS_PLUGIN_INTERNALS__) {
           const path = await downloadDir();
           const filePath = `${path}${chatSession?.content}.png`;
           const result = await dialog.save({
